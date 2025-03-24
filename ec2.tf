@@ -41,7 +41,6 @@ data "aws_ami" "example" {
 data "aws_ssm_parameter" "private_key" {
   name            = "siva"
   with_decryption = true
-  sensitive = false
 }
 
 # Resource Block
@@ -104,8 +103,8 @@ resource "null_resource" "run_ansible" {
 
     inline = [
     "sudo chmod +x /home/ubuntu/script.sh",
-    "sudo /home/ubuntu/script.sh \"${data.aws_ssm_parameter.private_key.value}\" \"${aws_instance.k8s_nodes["node-1"].private_ip}\" \"${aws_instance.k8s_nodes["node-2"].private_ip}\""
-   ]
+    "sudo /home/ubuntu/script.sh \"${nonsensitive(data.aws_ssm_parameter.private_key.value)}\" \"${aws_instance.k8s_nodes["node-1"].private_ip}\" \"${aws_instance.k8s_nodes["node-2"].private_ip}\""
+    ]
   }
 }
 

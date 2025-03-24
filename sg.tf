@@ -1,18 +1,9 @@
-### Control Plane SG
+# Control Plane Security Group
 resource "aws_security_group" "k8s_control_plane_sg" {
   name        = "k8s-control-plane-sg"
   description = "Security group for Kubernetes control plane (API server, etcd, controllers)"
 
-  # Allow Kubernetes API server (6443) from all worker nodes
-  ingress {
-    from_port   = 6443
-    to_port     = 6443
-    protocol    = "tcp"
-    description = "Allow Kubernetes API server access from worker nodes"
-    security_groups = [aws_security_group.k8s_node_sg.id]
-  }
-
-  # Allow etcd server client API (2379-2380) from kube-apiserver and etcd itself
+  # Allow etcd server client API (2379-2380) from itself
   ingress {
     from_port   = 2379
     to_port     = 2380
@@ -21,17 +12,16 @@ resource "aws_security_group" "k8s_control_plane_sg" {
     self        = true
   }
 
-  # Allow Kubelet API (10250) from self and worker nodes
+  # Allow Kubelet API (10250) from itself
   ingress {
     from_port   = 10250
     to_port     = 10250
     protocol    = "tcp"
-    description = "Allow Kubelet API access from self and worker nodes"
+    description = "Allow Kubelet API access from itself"
     self        = true
-    security_groups = [aws_security_group.k8s_node_sg.id]
   }
 
-  # Allow kube-scheduler (10259) from self only
+  # Allow kube-scheduler (10259) from self
   ingress {
     from_port   = 10259
     to_port     = 10259
@@ -40,7 +30,7 @@ resource "aws_security_group" "k8s_control_plane_sg" {
     self        = true
   }
 
-  # Allow kube-controller-manager (10257) from self only
+  # Allow kube-controller-manager (10257) from self
   ingress {
     from_port   = 10257
     to_port     = 10257
@@ -48,6 +38,7 @@ resource "aws_security_group" "k8s_control_plane_sg" {
     description = "Allow kube-controller-manager to communicate within control plane"
     self        = true
   }
+
   # Allow SSH
   ingress {
     from_port   = 22
@@ -67,20 +58,10 @@ resource "aws_security_group" "k8s_control_plane_sg" {
   }
 }
 
-# NodeSG
+# Worker Node Security Group
 resource "aws_security_group" "k8s_node_sg" {
   name        = "k8s-node-sg"
   description = "Security group for Kubernetes worker nodes"
-
-  # Allow Kubelet API (10250) from control plane and self
-  ingress {
-    from_port   = 10250
-    to_port     = 10250
-    protocol    = "tcp"
-    description = "Allow Kubelet API access from self and control plane"
-    self        = true
-    security_groups = [aws_security_group.k8s_control_plane_sg.id]
-  }
 
   # Allow kube-proxy (10256) from self (other worker nodes) and Load Balancers
   ingress {
@@ -91,7 +72,7 @@ resource "aws_security_group" "k8s_node_sg" {
     self        = true
   }
 
-  # Allow NodePort services (30000-32767) from anywhere (adjust as needed)
+  # Allow NodePort services (30000-32767) from anywhere
   ingress {
     from_port   = 30000
     to_port     = 32767
@@ -99,6 +80,7 @@ resource "aws_security_group" "k8s_node_sg" {
     description = "Allow NodePort services access from all sources"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   # Allow SSH
   ingress {
     from_port   = 22
@@ -118,3 +100,24 @@ resource "aws_security_group" "k8s_node_sg" {
   }
 }
 
+# Separate Rules to Allow Cross Communication
+
+resource "aws_security_group_rule" "allow_api_server_from_nodes" {
+  type                     = "ingress"
+  from_port                = 6443
+  to_port                  = 6443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.k8s_control_plane_sg.id
+  source_security_group_id = aws_security_group.k8s_node_sg.id
+  description              = "Allow Kubernetes API server access from worker nodes"
+}
+
+resource "aws_security_group_rule" "allow_kubelet_from_control_plane" {
+  type                     = "ingress"
+  from_port                = 10250
+  to_port                  = 10250
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.k8s_node_sg.id
+  source_security_group_id = aws_security_group.k8s_control_plane_sg.id
+  description              = "Allow Kubelet API access from control plane"
+}

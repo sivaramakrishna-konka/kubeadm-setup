@@ -73,7 +73,7 @@ resource "null_resource" "run_ansible" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = data.aws_ssm_parameter.private_key.value 
-      host        = aws_instance.k8s_nodes["master"].public_ip
+      host        = aws_instance.k8s_nodes["control-plane"].public_ip
     }
   }
 
@@ -83,7 +83,7 @@ resource "null_resource" "run_ansible" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = data.aws_ssm_parameter.private_key.value 
-      host        = aws_instance.k8s_nodes["master"].public_ip
+      host        = aws_instance.k8s_nodes["control-plane"].public_ip
     }
 
     inline = [
@@ -95,8 +95,8 @@ resource "null_resource" "run_ansible" {
     "sudo apt update && sudo apt install -y ansible",
 
     # Create Ansible inventory file
-    "echo '[master]' | sudo tee /home/ubuntu/inventory.ini",
-    "echo 'master ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo '[control-plane]' | sudo tee /home/ubuntu/inventory.ini",
+    "echo 'control-plane ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",

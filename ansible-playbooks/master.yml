@@ -1,5 +1,5 @@
 - name: Initialize Kubernetes Master
-  hosts: master
+  hosts: control-plane
   become: yes
   tasks:
     

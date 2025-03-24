@@ -89,7 +89,7 @@ resource "null_resource" "run_ansible" {
     inline = [
     # Fetch private key from AWS SSM and save it securely
     "echo '${data.aws_ssm_parameter.private_key.value}' | sudo tee /home/ubuntu/siva > /dev/null",
-    "sudo chmod 400 /home/ubuntu/siva"
+    "sudo chmod 400 /home/ubuntu/siva",
 
     # Install Ansible
     "sudo apt update && sudo apt install -y ansible",
@@ -104,7 +104,7 @@ resource "null_resource" "run_ansible" {
     # Verify files and key
     "ls -l /home/ubuntu/",
     "md5sum /home/ubuntu/siva",  # Validate private key
-    "ssh-keygen -y -f /home/ubuntu/siva",  # Ensure key is valid
+    "ssh-keygen -y -f /home/ubuntu/siva"  # Ensure key is valid
 
     # # Ensure Playbook files exist
     # "ls -l /home/ubuntu/*.yml",

@@ -102,6 +102,18 @@ resource "aws_security_group" "k8s_node_sg" {
 
 # Separate Rules to Allow Cross Communication
 
+# Allow Kubelet API (10250) from worker nodes to control plane
+resource "aws_security_group_rule" "allow_kubelet_from_nodes" {
+  type                     = "ingress"
+  from_port                = 10250
+  to_port                  = 10250
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.k8s_control_plane_sg.id
+  source_security_group_id = aws_security_group.k8s_node_sg.id
+  description              = "Allow Kubelet API access from worker nodes to control plane"
+}
+
+# Allow control plane communication from worker nodes (API server)
 resource "aws_security_group_rule" "allow_api_server_from_nodes" {
   type                     = "ingress"
   from_port                = 6443
@@ -112,6 +124,7 @@ resource "aws_security_group_rule" "allow_api_server_from_nodes" {
   description              = "Allow Kubernetes API server access from worker nodes"
 }
 
+# Allow Kubelet API access from control plane
 resource "aws_security_group_rule" "allow_kubelet_from_control_plane" {
   type                     = "ingress"
   from_port                = 10250
@@ -121,3 +134,4 @@ resource "aws_security_group_rule" "allow_kubelet_from_control_plane" {
   source_security_group_id = aws_security_group.k8s_control_plane_sg.id
   description              = "Allow Kubelet API access from control plane"
 }
+

@@ -146,7 +146,7 @@
       ansible.builtin.systemd:
         name: containerd
         state: restarted
-        
+
 - name: Initialize Kubernetes Master
   hosts: control-plane1
   become: yes

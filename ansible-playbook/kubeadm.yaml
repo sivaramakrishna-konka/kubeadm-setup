@@ -148,7 +148,7 @@
         state: restarted
 
 - name: Initialize Kubernetes Master
-  hosts: control-plane1
+  hosts: mg
   become: yes
   tasks:
     

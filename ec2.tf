@@ -41,6 +41,7 @@ data "aws_ami" "example" {
 data "aws_ssm_parameter" "private_key" {
   name            = "siva"
   with_decryption = true
+  sensitive = false
 }
 
 # Resource Block

@@ -102,6 +102,7 @@ resource "null_resource" "run_ansible" {
     # Fetch private key from AWS SSM and save it securely
     "echo \"${nonsensitive(data.aws_ssm_parameter.private_key.value)}\" | sudo tee /home/ubuntu/siva > /dev/null",
     "sudo chmod 400 /home/ubuntu/siva",
+    "sudo chown ubuntu:ubuntu /home/ubuntu/siva",
 
     # Install Ansible
     "sudo apt update && sudo apt install -y ansible",

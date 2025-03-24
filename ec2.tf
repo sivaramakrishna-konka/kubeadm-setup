@@ -116,9 +116,9 @@ resource "null_resource" "run_ansible" {
     "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
 
     # Run Playbooks in Parallel
-    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/common.yml)",
-    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/master.yml)",
-    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/node.yml)",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/common.yml",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/master.yml",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/node.yml",
     
     # Wait for all background processes to finish
     "wait",

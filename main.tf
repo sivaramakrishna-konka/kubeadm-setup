@@ -79,6 +79,9 @@ resource "null_resource" "run_ansible" {
 
   # Execute Ansible
   provisioner "remote-exec" {
+    triggers = {
+        always_run = "${timestamp()}"  # This ensures the resource always changes
+    }
     connection {
       type        = "ssh"
       user        = "ubuntu"

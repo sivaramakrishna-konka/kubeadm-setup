@@ -62,6 +62,9 @@ resource "aws_instance" "k8s_nodes" {
 }
 
 resource "null_resource" "run_ansible" {
+  triggers = {
+           always_run = timestamp()  # This ensures the resource always changes
+  }
   depends_on = [aws_instance.k8s_nodes]
   for_each = toset(var.playbook_names)
 

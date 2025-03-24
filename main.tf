@@ -91,20 +91,20 @@ resource "null_resource" "run_ansible" {
     "echo '${data.aws_ssm_parameter.private_key.value}' | sudo tee /home/ubuntu/siva > /dev/null",
     "sudo chmod 400 /home/ubuntu/siva"
 
-    # # Install Ansible
-    # "sudo apt update && sudo apt install -y ansible",
+    # Install Ansible
+    "sudo apt update && sudo apt install -y ansible",
 
-    # # Create Ansible inventory file
-    # "echo '[control-plane]' | sudo tee /home/ubuntu/inventory.ini",
-    # "echo 'control-plane ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
-    # "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
-    # "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
-    # "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    # Create Ansible inventory file
+    "echo '[control-plane]' | sudo tee /home/ubuntu/inventory.ini",
+    "echo 'control-plane ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
 
-    # # Verify files and key
-    # "ls -l /home/ubuntu/",
-    # "md5sum /home/ubuntu/siva",  # Validate private key
-    # "ssh-keygen -y -f /home/ubuntu/siva",  # Ensure key is valid
+    # Verify files and key
+    "ls -l /home/ubuntu/",
+    "md5sum /home/ubuntu/siva",  # Validate private key
+    "ssh-keygen -y -f /home/ubuntu/siva",  # Ensure key is valid
 
     # # Ensure Playbook files exist
     # "ls -l /home/ubuntu/*.yml",

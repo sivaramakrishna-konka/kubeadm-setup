@@ -61,62 +61,62 @@ resource "aws_instance" "k8s_nodes" {
   }
 }
 
-# resource "null_resource" "run_ansible" {
-#   depends_on = [aws_instance.k8s_nodes]
-#   for_each = toset(var.playbook_names)
+resource "null_resource" "run_ansible" {
+  depends_on = [aws_instance.k8s_nodes]
+  for_each = toset(var.playbook_names)
 
-#   provisioner "file" {
-#     source      = "ansible-playbooks/${each.key}"
-#     destination = "/home/ubuntu/${each.key}"
+  provisioner "file" {
+    source      = "ansible-playbooks/${each.key}"
+    destination = "/home/ubuntu/${each.key}"
 
-#     connection {
-#       type        = "ssh"
-#       user        = "ubuntu"
-#       private_key = data.aws_ssm_parameter.private_key.value 
-#       host        = aws_instance.k8s_nodes["master"].public_ip
-#     }
-#   }
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = data.aws_ssm_parameter.private_key.value 
+      host        = aws_instance.k8s_nodes["master"].public_ip
+    }
+  }
 
-#   # Execute Ansible
-#   provisioner "remote-exec" {
-#     connection {
-#       type        = "ssh"
-#       user        = "ubuntu"
-#       private_key = data.aws_ssm_parameter.private_key.value 
-#       host        = aws_instance.k8s_nodes["master"].public_ip
-#     }
+  # Execute Ansible
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = data.aws_ssm_parameter.private_key.value 
+      host        = aws_instance.k8s_nodes["master"].public_ip
+    }
 
-#     inline = [
-#     # Fetch private key from AWS SSM and save it securely
-#     "echo '${data.aws_ssm_parameter.private_key.value}' | sudo tee /home/ubuntu/siva > /dev/null",
-#     "sudo chmod 400 /home/ubuntu/siva",
+    inline = [
+    # Fetch private key from AWS SSM and save it securely
+    "echo '${data.aws_ssm_parameter.private_key.value}' | sudo tee /home/ubuntu/siva > /dev/null",
+    "sudo chmod 400 /home/ubuntu/siva",
 
-#     # Install Ansible
-#     "sudo apt update && sudo apt install -y ansible",
+    # Install Ansible
+    "sudo apt update && sudo apt install -y ansible",
 
-#     # Create Ansible inventory file
-#     "echo '[master]' | sudo tee /home/ubuntu/inventory.ini",
-#     "echo 'master ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
-#     "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
-#     "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
-#     "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    # Create Ansible inventory file
+    "echo '[master]' | sudo tee /home/ubuntu/inventory.ini",
+    "echo 'master ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
 
-#     # Verify files and key
-#     "ls -l /home/ubuntu/",
-#     "md5sum /home/ubuntu/siva",  # Validate private key
-#     "ssh-keygen -y -f /home/ubuntu/siva",  # Ensure key is valid
+    # Verify files and key
+    "ls -l /home/ubuntu/",
+    "md5sum /home/ubuntu/siva",  # Validate private key
+    "ssh-keygen -y -f /home/ubuntu/siva",  # Ensure key is valid
 
-#     # Ensure Playbook files exist
-#     "ls -l /home/ubuntu/*.yaml",
-#     "sudo chmod +r /home/ubuntu/*.yaml",
+    # Ensure Playbook files exist
+    "ls -l /home/ubuntu/*.yml",
+    "sudo chmod +r /home/ubuntu/*.yml",
 
-#     # Run Ansible Playbooks
-#     "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/common.yml",
-#     "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/master.yml",
-#     "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/node.yml"
-#   ]
-#   }
-# }
+    # Run Ansible Playbooks
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/common.yml",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/master.yml",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/node.yml"
+  ]
+  }
+}
 
 # r53 records
 resource "aws_route53_record" "www" {

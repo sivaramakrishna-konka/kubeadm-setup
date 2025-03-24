@@ -109,7 +109,7 @@ resource "null_resource" "run_ansible" {
 
     # Create Ansible inventory file
     "echo '[control_plane]' | sudo tee /home/ubuntu/inventory.ini > /dev/null",
-    "echo 'master ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'control_plane ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo 'node_1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo 'node_2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",

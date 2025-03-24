@@ -108,11 +108,11 @@ resource "null_resource" "run_ansible" {
     "sudo apt update && sudo apt install -y ansible",
 
     # Create Ansible inventory file
-    "echo '[control_plane]' | sudo tee /home/ubuntu/inventory.ini > /dev/null",
-    "echo 'control-plane ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo '[mg]' | sudo tee /home/ubuntu/inventory.ini > /dev/null",
+    "echo 'master ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
     "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
-    "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
-    "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node1 ansible_host=${aws_instance.k8s_nodes["node1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node2 ansible_host=${aws_instance.k8s_nodes["node2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
 
     # Run Playbooks in Parallel
     "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/kubeadm.yaml",

@@ -1,8 +1,8 @@
 # variables
 variable "instance_types" {
   default = {
-    "control-plane"  = "t3a.medium"
-    "node-1" = "t3a.medium"
-    "node-2" = "t3a.medium"
+    "master"  = "t3a.small"
+    "node1" = "t3a.small"
+    "node2" = "t3a.small"
   }
 }

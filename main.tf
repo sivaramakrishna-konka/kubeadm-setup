@@ -85,7 +85,7 @@ resource "null_resource" "run_ansible" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = data.aws_ssm_parameter.private_key.value 
-      host        = aws_instance.k8s_nodes["control-plane"].public_ip
+      host        = aws_instance.k8s_nodes["master"].public_ip
     }
   }
 
@@ -95,7 +95,7 @@ resource "null_resource" "run_ansible" {
       type        = "ssh"
       user        = "ubuntu"
       private_key = data.aws_ssm_parameter.private_key.value 
-      host        = aws_instance.k8s_nodes["control-plane"].public_ip
+      host        = aws_instance.k8s_nodes["master"].public_ip
     }
 
     inline = [

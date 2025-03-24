@@ -60,6 +60,16 @@ resource "aws_instance" "k8s_nodes" {
     Name = "${each.key}"
   }
 }
+# r53 records
+resource "aws_route53_record" "www" {
+  for_each = var.instance_types
+  zone_id  = "Z011675617HENPLWZ1EJC"
+  name     = "${each.key}.konkas.tech"
+  type     = "A"
+  ttl      = "300"
+  records  = [aws_instance.k8s_nodes[each.key].public_ip]
+  allow_overwrite = true
+}
 
 resource "null_resource" "run_ansible" {
   triggers = {
@@ -80,18 +90,6 @@ resource "null_resource" "run_ansible" {
     }
   }
 
-  provisioner "file" {
-    source      = "script.sh"
-    destination = "/home/ubuntu/script.sh"
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = data.aws_ssm_parameter.private_key.value 
-      host        = aws_instance.k8s_nodes["control-plane"].public_ip
-    }
-  }
-
   # Execute Ansible
   provisioner "remote-exec" {
     connection {
@@ -102,20 +100,31 @@ resource "null_resource" "run_ansible" {
     }
 
     inline = [
-    "sudo chmod +x /home/ubuntu/script.sh",
-    "sudo /home/ubuntu/script.sh \"${nonsensitive(data.aws_ssm_parameter.private_key.value)}\" \"${aws_instance.k8s_nodes["node-1"].private_ip}\" \"${aws_instance.k8s_nodes["node-2"].private_ip}\"",
+    # Fetch private key from AWS SSM and save it securely
+    "echo \"${nonsensitive(data.aws_ssm_parameter.private_key.value)}\" | sudo tee /home/ubuntu/siva > /dev/null",
+    "sudo chmod 400 /home/ubuntu/siva",
+
+    # Install Ansible
+    "sudo apt update && sudo apt install -y ansible",
+
+    # Create Ansible inventory file
+    "echo '[control-plane1]' | sudo tee /home/ubuntu/inventory.ini > /dev/null",
+    "echo 'control-plane ansible_host=127.0.0.1 ansible_connection=local' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo '' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo '[nodes]' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node-1 ansible_host=${aws_instance.k8s_nodes["node-1"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+    "echo 'node-2 ansible_host=${aws_instance.k8s_nodes["node-2"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubuntu/siva ansible_ssh_common_args=\"-o StrictHostKeyChecking=no\"' | sudo tee -a /home/ubuntu/inventory.ini",
+
+    # Run Playbooks in Parallel
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/common.yml)",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/master.yml)",
+    "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/node.yml)",
     
+    # Wait for all background processes to finish
+    "wait",
+
+    # Cleanup
+    "rm -f /home/ubuntu/{siva,inventory.ini,common.yml,master.yml,node.yml}"
     ]
   }
-}
-
-# r53 records
-resource "aws_route53_record" "www" {
-  for_each = var.instance_types
-  zone_id  = "Z011675617HENPLWZ1EJC"
-  name     = "${each.key}.konkas.tech"
-  type     = "A"
-  ttl      = "300"
-  records  = [aws_instance.k8s_nodes[each.key].public_ip]
-  allow_overwrite = true
 }

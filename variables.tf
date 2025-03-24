@@ -6,7 +6,3 @@ variable "instance_types" {
     "node-2" = "t3a.medium"
   }
 }
-
-variable "playbook_names"{
-    default = ["common.yml","master.yml","node.yml"]
-}

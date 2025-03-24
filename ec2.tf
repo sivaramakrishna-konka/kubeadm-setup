@@ -76,7 +76,6 @@ resource "null_resource" "run_ansible" {
            always_run = timestamp()
   }
   depends_on = [aws_instance.k8s_nodes]
-  for_each = toset(var.playbook_names)
 
   provisioner "file" {
     source      = "ansible-playbook/kubeadm.yml"

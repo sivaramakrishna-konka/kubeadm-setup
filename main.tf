@@ -116,7 +116,7 @@ resource "null_resource" "run_ansible" {
 
     # Run Playbooks in Parallel
     "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /home/ubuntu/inventory.ini /home/ubuntu/kubeadm.yaml",
-    "rm -f /home/ubuntu/{siva,inventory.ini,kubeadm.yaml,calico.yaml}"
+    "rm -rf /home/ubuntu/{siva,inventory.ini,kubeadm.yaml,calico.yaml}"
     ]
   }
 }

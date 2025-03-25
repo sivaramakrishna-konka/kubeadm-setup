@@ -146,7 +146,6 @@
       ansible.builtin.systemd:
         name: containerd
         state: restarted
-
 - name: Initialize Kubernetes Master
   hosts: mg
   become: yes
@@ -230,12 +229,6 @@
         line: "alias k='kubectl'"
         create: yes
         state: present
-        
-    - name: Source .bashrc to apply the alias
-      ansible.builtin.shell:
-        cmd: "source /home/ubuntu/.bashrc"
-        executable: /bin/bash
-        creates: /home/ubuntu/.bashrc
 
     - name: Ensure .kube directory exists
       ansible.builtin.file:
@@ -269,7 +262,7 @@
           }
         ]'
 
-- name: Join Nodes
+- name: Join Worker Nodes
   hosts: nodes
   become: yes
   tasks:
@@ -294,4 +287,3 @@
     - name: Join Kubernetes cluster
       ansible.builtin.command: "{{ join_command }}"
       when: not kubelet_conf.stat.exists
-

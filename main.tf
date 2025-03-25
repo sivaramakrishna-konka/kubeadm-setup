@@ -49,7 +49,7 @@ resource "aws_instance" "k8s_nodes" {
   ami                         = data.aws_ami.example.id
   instance_type               = each.value
   key_name                    = "siva"
-  security_groups = each.key == "control-plane" ? [aws_security_group.k8s_control_plane_sg.name] : [aws_security_group.k8s_node_sg.name]
+  security_groups = each.key == [aws_security_group.k8s_sg.name]
   associate_public_ip_address = true
 
   root_block_device {

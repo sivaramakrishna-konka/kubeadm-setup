@@ -1,43 +1,45 @@
-# Kubeadm Setup
+# Kubeadm Cluster Automation with Terraform and Ansible
 
 ## Overview
-This project sets up a **3-node Kubernetes cluster** using **kubeadm**. The infrastructure is provisioned with **Terraform**, and **Ansible** automates the installation and configuration of the cluster. The setup runs through a **GitHub Actions pipeline** and leverages **OIDC** for authentication, eliminating the need for credentials.
+This project automates the creation of a Kubernetes cluster using **kubeadm**, **Terraform**, and **Ansible**. The entire setup is fully automated and completes within approximately **5 minutes**.
 
-## Architecture
-- **3-node cluster** (1 Master, 2 Workers)
-- **Terraform** provisions cloud instances
-- **Ansible** automates the kubeadm cluster setup (runs on the Master node)
-- **Ansible uses the private key for authentication** to connect to agent nodes for installation and configuration
-- **GitHub Actions** pipeline automates the entire process
-- **OIDC authentication** for permission management (no credentials required)
-- **Workflows for creation and deletion** are available in the same repository under `.github/workflows/`.
-- **GitHub-hosted runners** are used, eliminating the need to install Terraform locally.
+## Key Features
+- **GitHub Workflows**: Automates instance creation and execution of Ansible playbooks using Terraform's `remote-exec`.
+- **AWS Parameter Store**: Stores and fetches required key securely using Terraform `data` block.
+- **Ubuntu AMI Fetching**: Dynamically retrieves the latest Ubuntu AMI.
+- **OIDC Authentication**: Implements OIDC for authentication and authorization with AWS.
+- **GitHub Hosted Runners**: Executes Terraform and Ansible playbooks.
+- **Provisioning Playbook** (`provision.yml`): Triggers the creation of the **kubeadm** cluster.
+- **Destruction Playbook** (`destroy.yml`): Triggers the deletion of the **kubeadm** cluster.
+- **Ansible Playbook**: Configures a **3-node Kubernetes cluster**.
+- **Terraform Remote-Exec**: Installs Ansible on the master node before running playbooks.
+- **Security Group (SG) Configuration**: Currently allows all traffic (not following security best practices since this is for practice only).
 
 ## Prerequisites
-Ensure you have the following set up:
-- GitHub Actions workflow configured
-- OIDC authentication enabled
-- Private and public key pair configured in AWS
-- Place the **private key** in the repository securely for access (used by Ansible for authentication)
-- Ensure line endings use **LF** instead of **CRLF**
+- No need for local Terraform, Ansible, or AWS CLI configuration as GitHub Workflows handle everything.
+- Basic knowledge of:
+  - **GitHub Workflows**
+  - **Terraform**
+  - **Ansible**
 
-## Setup Guide
-
-### Step 1: Trigger the GitHub Actions Pipeline
-1. Trigger the pipeline manually or push changes to the repository.
-2. The pipeline will:
-   - Use Terraform (on GitHub-hosted runners) to create instances
-   - Use Ansible (running on the Master node) to configure the cluster
-
-### Step 2: Verify the Cluster
-Once the setup is complete, SSH into the master node and run:
-```sh
-kubectl get nodes
-```
-You should see all three nodes in a **Ready** state.
+## Deployment Steps
+1. Clone the repository:
+   ```bash
+   git clone <repo-url>
+   cd <repo-directory>
+   ```
+2. Trigger the GitHub workflow to provision infrastructure.
+3. Monitor the GitHub Actions workflow for instance provisioning and configuration.
+4. Once completed, access the Kubernetes cluster using:
+   ```bash
+   kubectl get nodes
+   ```
 
 ## Cleanup
 To destroy the setup, simply trigger the GitHub Actions pipeline for teardown.
+
+## Note
+- This setup is purely for practice and **does not** follow security best practices.
 
 ## Workflows
 The repository includes predefined GitHub Actions workflows for:
